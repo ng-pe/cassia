@@ -1,0 +1,43 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="All">
+    <Import Project="$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets" />
+    <ItemGroup>
+      <Projects Include="Cassia.sln" />
+    </ItemGroup>
+    <PropertyGroup>
+      <BuildPath>Bin\</BuildPath>
+      <DocPath>Doc\</DocPath>
+      <PackageLabel>Cassia-$(CCNetLabel).zip</PackageLabel>
+      <DropPath>..\Drops\Cassia\</DropPath>
+    </PropertyGroup>
+    
+    <Target Name="Clean">
+        <RemoveDir Directories="$(BuildPath);$(DocPath)" />
+        <MakeDir Directories="$(DropPath);$(BuildPath);$(DocPath)" />
+    </Target>
+    
+  <Target Name="Build" DependsOnTargets="Clean">
+        <AssemblyInfo Condition="'$(CCNetLabel)' != ''"
+                      CodeLanguage="CS"
+                      OutputFile="VersionInfo.cs"
+                      AssemblyVersion="$(CCNetLabel)"
+                      AssemblyFileVersion="$(CCNetLabel)"
+                      CLSCompliant="true" 
+                      AssemblyCompany="Cassia Developers"
+                      AssemblyProduct="Cassia: .NET Terminal Services Library"
+                      AssemblyCopyright="Copyright © 2008 - 2009" />
+    <MSBuild Projects="@(Projects)" Targets="Build" Properties="Configuration=Release" />  
+  </Target>
+    
+  <Target Name="Package">
+    <CreateItem Include="**\*.*" Exclude="**\obj\**\*.*;**\*.suo;**\*.user;**\*.log;**\*.cache;**\.svn\**\*.*;**\*Resharper*\**\*.*">
+      <Output TaskParameter="Include" ItemName="PackageFiles" />
+    </CreateItem>
+    <Zip Files="@(PackageFiles)" ZipFileName="$(DropPath)$(PackageLabel)" />
+  </Target>
+
+  <Target Name="Documentation">
+	<MSBuild Projects="Cassia.shfbproj" Properties="Configuration=Release;Platform=AnyCPU" />
+  </Target>
+  
+  <Target Name="All" DependsOnTargets="Build;Documentation;Package" />
+</Project>
